@@ -33,7 +33,7 @@ app.get('/api/v1/posts/create', async (req: Request, res: Response) => {
     let date: Date = new Date();  
     const response = {
         origin: "You got the response from the create-server",
-        data: req.body.data,
+        data: req.query.data,
         time: date
     };
 
