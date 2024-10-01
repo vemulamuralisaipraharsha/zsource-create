@@ -16,9 +16,6 @@ const producer = Producer.create({
   })
 });
 
-// send messages to the queue
-// await producer.send(['msg1', 'msg2']);
-
 const app: any = express();
 const bodyparser = require('body-parser')
 app.use(bodyparser.json())
@@ -57,6 +54,6 @@ app.get("/health", (req: Request, res: Response) => {
   )
 });
 
-app.listen(PORT, "10.3.0.220", () => {
+app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
