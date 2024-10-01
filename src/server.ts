@@ -5,18 +5,18 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const producer = Producer.create({
-    queueUrl: 'https://sqs.eu-north-1.amazonaws.com/124355649508/CreatePostsMQ',
+  queueUrl: 'https://sqs.eu-north-1.amazonaws.com/124355649508/CreatePostsMQ',
+  region: 'eu-north-1',
+  sqs: new SQSClient({
     region: 'eu-north-1',
-    sqs: new SQSClient({
-      region: 'eu-north-1',
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESSKEY_ID ?? "",
-        secretAccessKey: process.env.AWS_ACCESSKEY_SECRET ?? ""
-      }
-    })
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESSKEY_ID ?? "",
+      secretAccessKey: process.env.AWS_ACCESSKEY_SECRET ?? ""
+    }
+  })
 });
-  
-  // send messages to the queue
+
+// send messages to the queue
 // await producer.send(['msg1', 'msg2']);
 
 const app: any = express();
@@ -26,33 +26,37 @@ app.use(bodyparser.json())
 const PORT: number = 5000;
 
 const generateId = () => {
-    return `msg-${Date.now()}`;
+  return `msg-${Date.now()}`;
 };
 
 app.get('/api/v1/posts/create', async (req: Request, res: Response) => {
-    let date: Date = new Date();  
-    const response = {
-        origin: "You got the response from the create-server",
-        data: req.query.data,
-        time: date
-    };
-
-    await producer.send({
-        id: generateId(),
-        body: JSON.stringify(response)
-    });
-    res.send(response);
+  let date: Date = new Date();
+  let data_from_api_server: any = req.query.data;
+  const response = {
+    "Records": [
+      JSON.parse(data_from_api_server)
+    ]
+  }
+  
+  const stringResponse = JSON.stringify(response);
+  console.log(stringResponse);
+  
+  await producer.send({
+    id: generateId(),
+    body: stringResponse
+  });
+  res.send(response);
 });
 
-app.get("/health" , (req:Request,res:Response)=>{
+app.get("/health", (req: Request, res: Response) => {
   res.send(
     {
-      data:"I am from Create Server",
-      message:"Health checks are successful"
+      data: "I am from Create Server",
+      message: "Health checks are successful"
     }
-)
+  )
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(PORT, "10.3.0.220", () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
